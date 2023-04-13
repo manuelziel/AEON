@@ -344,22 +344,21 @@ DateTime AEON_Time::getTimeAsDateTime()
 }
 
 /*
-
+buffer can be defined using following combinations:
+hh    - the hour with a leading zero (00 to 23)
+mm    - the minute with a leading zero (00 to 59)
+ss    - the whole second with a leading zero where applicable (00 to 59)
+YYYY  - the year as four digit number
+YY    - the year as two digit number (00-99)
+MM    - the month as number with a leading zero (01-12)
+MMM   - the abbreviated English month name ('Jan' to 'Dec')
+DD    - the day as number with a leading zero (01 to 31)
+DDD   - the abbreviated English day name ('Mon' to 'Sun')
 */
 String AEON_Time::getTimeAsString()
 {
   DateTime now = rtc.now();
-  // buffer can be defined using following combinations:
-  // hh - the hour with a leading zero (00 to 23)
-  // mm - the minute with a leading zero (00 to 59)
-  // ss - the whole second with a leading zero where applicable (00 to 59)
-  // YYYY - the year as four digit number
-  // YY - the year as two digit number (00-99)
-  // MM - the month as number with a leading zero (01-12)
-  // MMM - the abbreviated English month name ('Jan' to 'Dec')
-  // DD - the day as number with a leading zero (01 to 31)
-  // DDD - the abbreviated English day name ('Mon' to 'Sun')
-
+  
   char buf[] = "hh:mm:ss DDD, MMM DD YYYY";
   return now.toString(buf);
 }

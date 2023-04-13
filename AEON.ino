@@ -1023,7 +1023,7 @@ unsigned long currentMillis_error = 0;
 unsigned long previousMillis_error = 0;
 
 void pageStateError() {
-  char localText[24];                     // Display can only 20 chars in one line
+  char localText[24];                     // Display can only 20 chars at one line
   String noError = "No Error detected";   // 17 chars - No Error detected
   String notValid = "No data in EEPROM";  // 17 chars - EEPROM has no data sign is valid
   String commitFaild = "Error EEPROM";    // EEPROM error while save data commit error
