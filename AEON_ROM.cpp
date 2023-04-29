@@ -1,10 +1,11 @@
 /* 
-AEON_ROM.cpp
+AEON_ROM.cpp 
 */
 
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <time.h>
+#include "AEON_Global.h"
 #include "AEON_ROM.h"
 
 /* 
@@ -35,6 +36,7 @@ EReturn_ROM AEON_ROM::setupEEPROM()
     // EEPROM not initialized
     Serial.println("ROM doesn't store valid data! Write new signature.");
     EEPROM.write(stoAdd, wrtnSig); // EEPROM need 3,3 millisec to save!
+    resetEEPROM();
     localReturn = EReturn_ROM::ERROR_EEPROM_NOT_VALID_DATA;
     
     // Commit ROM
@@ -52,18 +54,15 @@ EReturn_ROM AEON_ROM::setupEEPROM()
 }
 
 /*
-  This function is responsible for writing data to an EEPROM.
+This function is responsible for writing data to an EEPROM.
 */
 void AEON_ROM::saveToEEPROM()
 {
   EReturn_ROM localReturn = EReturn_ROM::ROM_RETURN_NULL;
 
-  //Check if initialization values need to be set to true for the first time.
+  // Check if initialization values need to be set to true for the first time.
   // If all birthday fields are zero, then do not set initialization flag to true.
-  if ((this->birthdayYear != 0) && (this->birthdayMonth != 0) && (this->birthdayDay != 0))
-  {
-    this->init = true;
-  }
+  this->init = true;
 
   // Create an array to hold the values to be written to EEPROM.
   int contentArray[ARRAY_SIZE] = {
@@ -74,7 +73,7 @@ void AEON_ROM::saveToEEPROM()
       this->sex,
       this->lifespanWoman,
       this->lifespanMan,
-      };
+  };
 
   // Write the array of values to EEPROM at the specified address.
   if (!writeIntArrayIntoEEPROM(EEPROM_ADDRESS, contentArray, ARRAY_SIZE))
@@ -85,8 +84,8 @@ void AEON_ROM::saveToEEPROM()
 }
 
 /*
-  This method reads data from the EEPROM and updates the object properties.
-  It also prints the loaded data to the Serial Monitor.
+This method reads data from the EEPROM and updates the object properties.
+It also prints the loaded data to the Serial Monitor.
 */
 void AEON_ROM::getEEPROM()
 {
@@ -110,7 +109,7 @@ void AEON_ROM::getEEPROM()
   }
 
   // Print the loaded data to the Serial Monitor
-  Serial.printf("Init: %d, Birthday Year: %d, Birthday Month: %d, Birthday Day: %d, Sex: %s, Lifespan Woman: %d, Lifespan Man: %d",
+  Serial.printf("Init: %d, Birthday Year: %d, Birthday Month: %d, Birthday Day: %d, Sex: %d, Lifespan Woman: %d, Lifespan Man: %d",
                 this->init,
                 this->birthdayYear,
                 this->birthdayMonth,
@@ -123,33 +122,26 @@ void AEON_ROM::getEEPROM()
 }
 
 /*
-
+Set defaults for RAM and save to ROM
 */
-void AEON_ROM::setDefault(int year, int month, int day, int sex, int lifespanWoman, int lifespanMan)
+void AEON_ROM::resetEEPROM()
 {
-  this->birthdayYear  = year;
-  this->birthdayMonth = month;
-  this->birthdayDay   = day;
-  this->sex           = sex;
-  this->lifespanWoman = lifespanWoman;
-  this->lifespanMan   = lifespanMan;
-
+  this->birthdayYear  = GLOBAL_DEFAULTS::defaultBirthdayYear;
+  this->birthdayMonth = GLOBAL_DEFAULTS::defaultBirthdayMonth;
+  this->birthdayDay   = GLOBAL_DEFAULTS::defaultBirthdayDay;
+  this->sex           = GLOBAL_DEFAULTS::defaultSex;
+  this->lifespanWoman = GLOBAL_DEFAULTS::defaultLifespanWoman;
+  this->lifespanMan   = GLOBAL_DEFAULTS::defaultLifespanMan;
+  Serial.println("Set Defaults and reset EEPROM");
   saveToEEPROM();
 }
 
 /*
-
+Get the Init.
 */
-void AEON_ROM::resetEEPROM()
+bool AEON_ROM::getInit()
 {
-  // init, birthdayYear, birthdayMonth, birthdayDay, sex
-  int contentArray[ARRAY_SIZE] = {0, 0, 0, 0, 1, 0};
-
-  // TODO check error
-  writeIntArrayIntoEEPROM(EEPROM_ADDRESS, contentArray, ARRAY_SIZE);
-
-  Serial.printf("\n Reset EEPROM \n");
-  delay(10);
+  return this->init;
 }
 
 /*
@@ -158,6 +150,14 @@ Set Init.
 void AEON_ROM::setInit(bool value)
 {
   this->init = value;
+}
+
+/*
+Get the Birthday Year
+*/
+int AEON_ROM::getBirthdayYear()
+{
+  return this->birthdayYear;
 }
 
 /*
@@ -176,24 +176,41 @@ void AEON_ROM::setBirthdayYear(int value)
 }
 
 /*
-Increment or decrement the birthday month by one.
+Get the birthday month
+*/
+int AEON_ROM::getBirthdayMonth()
+{
+  return this->birthdayMonth;
+}
+
+/*
+Set new birthday month
+Increment or decrement the birthday month by one. 
 */
 void AEON_ROM::setBirthdayMonth(int value)
 {
   // Check if the month is December and the increment value is positive, then set it to January.
-  if ((this->birthdayMonth == EBirthdayMonth::December) && (value > 0))
+  if ((this->birthdayMonth == EMonth::December) && (value > 0))
   {
-    this->birthdayMonth = EBirthdayMonth::January;
+    this->birthdayMonth = EMonth::January;
   }
   // Check if the month is January and the increment value is negative, then set it to December.
-  else if ((this->birthdayMonth == EBirthdayMonth::January) && (value < 0))
+  else if ((this->birthdayMonth == EMonth::January) && (value < 0))
   {
-    this->birthdayMonth = EBirthdayMonth::December;
+    this->birthdayMonth = EMonth::December;
   }
     // Increment or decrement the month based on the input value
   else {
     this->birthdayMonth += value;
   }
+}
+
+/*
+Get the birthday day
+*/
+int AEON_ROM::getBirthdayDay()
+{
+  return this->birthdayDay;
 }
 
 /*
@@ -230,6 +247,14 @@ void AEON_ROM::setBirthdayDay(int value)
 }
 
 /*
+Get the sex
+*/
+int AEON_ROM::getSex()
+{
+  return this->sex;
+}
+
+/*
 Set the sex.
 */
 void AEON_ROM::setSex()
@@ -245,8 +270,26 @@ void AEON_ROM::setSex()
 }
 
 /*
-  Sets the lifespan value based on the provided value and the person's sex.
-  value: the value by which the lifespan should be adjusted (+1 for increase, -1 for decrease)
+Get Lifespan 
+*/
+int AEON_ROM::getLifespan()
+{
+  int value;
+
+  if (this->sex == ESex::Woman)
+  {
+    value = this->lifespanWoman;
+  }
+  else if (this->sex == ESex::Man)
+  {
+    value = this->lifespanMan;
+  }
+  return value;
+}
+
+/*
+Sets the lifespan value based on the provided value and the person's sex.
+value: the value by which the lifespan should be adjusted (+1 for increase, -1 for decrease) 
 */
 void AEON_ROM::setLifespan(int value)
 {
@@ -286,38 +329,6 @@ void AEON_ROM::resetErrorStateRom()
 }
 
 /*
-Get the Init.
-*/
-bool AEON_ROM::getInit()
-{
-  return this->init;
-}
-
-/*
-Get the Birthday Year
-*/
-int AEON_ROM::getBirthdayYear()
-{
-  return this->birthdayYear;
-}
-
-/*
-Get the Birthday Month
-*/
-int AEON_ROM::getBirthdayMonth()
-{
-  return this->birthdayMonth;
-}
-
-/*
-Get the Birthday Day
-*/
-int AEON_ROM::getBirthdayDay()
-{
-  return this->birthdayDay;
-}
-
-/*
 Get the Birthday as Unix
 */
 long AEON_ROM::getBirthdayAsUnix()
@@ -325,48 +336,6 @@ long AEON_ROM::getBirthdayAsUnix()
   struct tm b_unix = {.tm_mday = this->birthdayDay, .tm_mon = this->birthdayMonth - 1, .tm_year = this->birthdayYear - 1900};
   time_t unixTime = mktime(&b_unix);
   return unixTime;
-}
-
-/*
-Get the Sex
-*/
-int AEON_ROM::getSex()
-{
-  return this->sex;
-}
-
-/*
-Get default Lifespan Woman
-*/
-int AEON_ROM::getDefaultLifespanWoman()
-{
-  return this->defaultLifespanWoman;
-}
-
-/*
-Get default Lifespan Man
-*/
-int AEON_ROM::getDefaultLifespanMan()
-{
-  return this->defaultLifespanMan;
-}
-
-/*
-Get Lifespan 
-*/
-int AEON_ROM::getLifespan()
-{
-  int value;
-
-  if (this->sex == ESex::Woman)
-  {
-    value = this->lifespanWoman;
-  }
-  else if (this->sex == ESex::Man)
-  {
-    value = this->lifespanMan;
-  }
-  return value;
 }
 
 /*

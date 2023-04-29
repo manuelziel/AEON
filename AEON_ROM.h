@@ -14,27 +14,6 @@ enum EReturn_ROM
   ERROR_EEPROM_COMMIT_FAILD,   // EEPROM commit failed
 };
 
-enum EBirthdayMonth
-{
-  January,
-  February,
-  March,
-  April,
-  May,
-  June,
-  July,
-  August,
-  September,
-  October,
-  November,
-  December,
-};
-
-enum ESex {
-  Woman,
-  Man
-};
-
 class AEON_ROM
 {
 private:
@@ -44,18 +23,17 @@ private:
   const int stoAdd = 0;   // stored signature address
   int romSig;             // check signature at address 0
 
-  const int ARRAY_SIZE = 8; // {init, birthdayYear, bithdayMonth, birthdayDay, sex, lifespan, (lastErrorState<-not)}
   const int EEPROM_ADDRESS = stoAdd + sizeof(wrtnSig);
-  const int defaultLifespanWoman = 86;
-  const int defaultLifespanMan = 79;
+  const int ARRAY_SIZE = 8; 
 
+  // ARRAY 
   bool init;
   int birthdayYear;
-  int birthdayMonth;          // 1 -12
-  int birthdayDay;            // 1- 31
-  int sex;                    // 0 = Female; 1 = Male
-  int lifespanWoman;          // ~ 86
-  int lifespanMan;            // ~ 79
+  int birthdayMonth;
+  int birthdayDay;
+  int sex;
+  int lifespanWoman;
+  int lifespanMan;
 
       /*
   * 00 = EEPROM_RETURN_NULL
@@ -74,7 +52,6 @@ public:
   EReturn_ROM setupEEPROM();
   void saveToEEPROM();
   void getEEPROM();
-  void setDefault(int year, int month, int day, int sex, int defaultLifetimeWoman, int defaultLifetimeMan);
   void resetEEPROM();
 
   void setInit(bool init);
@@ -83,6 +60,7 @@ public:
   void setBirthdayDay(int value);
   void setSex();
   void setLifespan(int value);
+  //void setLanguage(ELanguage language);
   void resetErrorStateRom();
 
   bool getInit();

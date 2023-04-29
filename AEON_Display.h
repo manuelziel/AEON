@@ -23,11 +23,6 @@ class AEON_Display
 {
 private:
 
-  enum ESex {
-  Woman,
-  Man
-  };
-
   int textSize;
   int y_Cursor;
   int x_Cursor;

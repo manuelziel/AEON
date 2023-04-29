@@ -7,6 +7,7 @@ AEON_Time.h
 
 #include <Arduino.h>
 #include <RTClib.h>
+#include "AEON_Global.h"
 
 enum EReturn_TIME
 {
@@ -41,11 +42,9 @@ private:
 
 public:
     EReturn_TIME setupTime();
-    void loopTime();
     void updateTime();
 
-    // Year, Month, Day, Hour, Minute, Second, UnixTime
-    void saveTime(int y, int mon, int d, int h, int mi, int sec, int u);
+    void saveTime(int year, int month, int day, int hour, int minute, int second, int unixTime);
 
     void setYear(int year);
     void setMonth(int month);

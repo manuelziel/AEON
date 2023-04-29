@@ -24,9 +24,6 @@ extern AEON_Time timer;
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-const char *dayOfWeekMapping[] = { "Sun", "Mon", "Tue", "Wed", "Thr", "Fri", "Sat" };
-const char *monthOfYearMapping[] = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
 enum ERotation {
   degrees_0,
   degrees_90,

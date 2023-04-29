@@ -35,8 +35,8 @@ EReturn_TIME AEON_Time::setupTime()
   if (rtc.lostPower())
   {
     Serial.println("RTC lost power, lets set the time!");
-    // Year, Month, Day, Hour, Minute, Second
-    rtc.adjust(DateTime(2000, 1, 1, 0, 0, 0));
+    rtc.adjust(DateTime(GLOBAL_DEFAULTS::defaultYear, GLOBAL_DEFAULTS::defaultMonth, GLOBAL_DEFAULTS::defaultDay, GLOBAL_DEFAULTS::defaultHour, GLOBAL_DEFAULTS::defaultMinute, GLOBAL_DEFAULTS::defaultSecond));
+    updateTime();
     localReturn = EReturn_TIME::ERROR_TIME_LOST_POWER; 
   }
   else
@@ -47,14 +47,7 @@ EReturn_TIME AEON_Time::setupTime()
 }
 
 /*
-
-*/
-void AEON_Time::loopTime()
-{
-}
-
-/*
-
+Update Time
 */
 void AEON_Time::updateTime()
 {
@@ -70,22 +63,29 @@ void AEON_Time::updateTime()
 }
 
 /*
-
+Save Year, Month, Day, Hour, Minute, Second, UnixTime
 */
-// Year, Month, Day, Hour, Minute, Second, UnixTime
-void AEON_Time::saveTime(int y, int mon, int d, int h, int mi, int sec, int u)
+void AEON_Time::saveTime(int year, int month, int day, int hour, int minute, int second, int unixTime)
 {
-  this->year = y;
-  this->month = mi;
-  this->day = d; 
-  this->hour = h;
-  this->minute = mi;
-  this->second = sec;
-  this->unix = u;
+  this->year = year;
+  this->month = minute;
+  this->day = day; 
+  this->hour = hour;
+  this->minute = minute;
+  this->second = second;
+  this->unix = unixTime;
 }
 
 /*
+Get the saved Year
+*/
+int AEON_Time::getYear()
+{
+  return year;
+}
 
+/*
+Set new Year
 */
 void AEON_Time::setYear(int value)
 {
@@ -105,7 +105,15 @@ void AEON_Time::setYear(int value)
 }
 
 /*
+Get the saved Month
+*/
+int AEON_Time::getMonth()
+{
+  return month;
+}
 
+/*
+Set new Month
 */
 void AEON_Time::setMonth(int value)
 {
@@ -131,7 +139,15 @@ void AEON_Time::setMonth(int value)
 }
 
 /*
+Get saved Day
+*/
+int AEON_Time::getDay()
+{
+  return day;
+}
 
+/*
+Set new Day
 */
 void AEON_Time::setDay(int value)
 {
@@ -162,7 +178,15 @@ void AEON_Time::setDay(int value)
 }
 
 /*
+Get saved Hour
+*/
+int AEON_Time::getHour()
+{
+  return hour;
+}
 
+/*
+Set new Hour
 */
 void AEON_Time::setHour(int value)
 {
@@ -186,7 +210,15 @@ void AEON_Time::setHour(int value)
 }
 
 /*
+Get saved Minute
+*/
+int AEON_Time::getMinute()
+{
+  return minute;
+}
 
+/*
+Set new Minute
 */
 void AEON_Time::setMinute(int value)
 {
@@ -211,7 +243,15 @@ void AEON_Time::setMinute(int value)
 }
 
 /*
+Get saved Second
+*/
+int AEON_Time::getSecond()
+{
+  return second;
+}
 
+/*
+Set new Second
 */
 void AEON_Time::setSecond(int value)
 {
@@ -240,54 +280,6 @@ Reset the error to state return null
 void AEON_Time::resetErrorStateTime()
 {
   EReturn_TIME lastErrorState = EReturn_TIME::TIME_RETURN_NULL;
-}
-
-/*
-
-*/
-int AEON_Time::getYear()
-{
-  return year;
-}
-
-/*
-
-*/
-int AEON_Time::getMonth()
-{
-  return month;
-}
-
-/*
-
-*/
-int AEON_Time::getDay()
-{
-  return day;
-}
-
-/*
-
-*/
-int AEON_Time::getHour()
-{
-  return hour;
-}
-
-/*
-
-*/
-int AEON_Time::getMinute()
-{
-  return minute;
-}
-
-/*
-
-*/
-int AEON_Time::getSecond()
-{
-  return second;
 }
 
 /*
