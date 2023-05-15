@@ -8,13 +8,7 @@ AEON_Time.h
 #include <Arduino.h>
 #include <RTClib.h>
 #include "AEON_Global.h"
-
-enum EReturn_TIME
-{
-    TIME_RETURN_NULL,     // No Return
-    ERROR_TIME_NO_RTC,    // Couldn't find RTC!
-    ERROR_TIME_LOST_POWER // RTC lost power
-};
+#include "AEON_Enums.h"
 
 class AEON_Time
 {

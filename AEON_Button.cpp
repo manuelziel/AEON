@@ -9,6 +9,7 @@ PIN Button OK   = 25
 */
 
 #include <Arduino.h>
+#include "AEON_Enums.h"
 #include "AEON_Button.h"
 
 unsigned long AEON_Button::debounceDelay = 50;     // default 50

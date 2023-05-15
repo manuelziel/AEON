@@ -39,6 +39,8 @@ On an Jupiter:    20(SDA), 21(SCL)
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
+#include "AEON_Enums.h"
+#include "AEON_Strings.h"
 #include "AEON_ROM.h"
 #include "AEON_Time.h"
 #include "AEON_Display.h"
@@ -52,6 +54,7 @@ FSM fsm;
 AEON_ROM rom;
 AEON_Display aeon;
 AEON_Time timer;
+AEON_Strings strings;
 AEON_Button buttons[] = {AEON_Button(22, "SET"), AEON_Button(23, "+"), AEON_Button(24, "-"), AEON_Button(25, "OK")};
 
 typedef struct
@@ -70,8 +73,8 @@ void setup()
 {
   Serial.begin(9600);
 
-  // while (!Serial) {
-  ; // wait for serial port to connect. Needed for native USB
+  //while (!Serial) {
+  //; // wait for serial port to connect. Needed for native USB
   //}
 
   // Setup ROM, Time and Display
@@ -89,163 +92,163 @@ void setup()
   // Base -> Setup (Current STATE?, NULL, NULL, NULL)
   fsm.addState((StateId)(STATE_Base), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET), // Event
-                      NULL,                 // Guard
+      ->addTransition((EventId)(EVENT_SET),                 // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupTime();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Time)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time))          // Next State
       ->end();
 
-  // SetupTime -> Setup_Time_Set_Hour || SetupBack
+  // SetupTime -> Setup_Time_Hour || SetupBack
   fsm.addState((StateId)(STATE_Setup_Time), NULL, NULL, NULL)
       // SET
       ->addTransition((EventId)(EVENT_SET),                 // Event
                       NULL,                                 // Guard
                       /*&page_setup_*/ NULL,                // Transition
-                      (StateId)(STATE_Setup_Time_Set_Hour)) // Next State
+                      (StateId)(STATE_Setup_Time_Hour))     // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupDate();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Date)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date))          // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupBack();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Back)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Back))          // Next State
 
       // OK
       ->addTransition((EventId)(EVENT_OK),                  // Event
                       NULL,                                 // Guard
                       NULL,                                 // Transition
-                      (StateId)(STATE_Setup_Time_Set_Hour)) // Next State
+                      (StateId)(STATE_Setup_Time_Hour))     // Next State
       ->end();
 
-  // Setup_Time_Set_Hour -> Setup_Time_Set_Minute
-  fsm.addState((StateId)(STATE_Setup_Time_Set_Hour), NULL, NULL, NULL)
+  // Setup_Time_Hour -> Setup_Time_Minute
+  fsm.addState((StateId)(STATE_Setup_Time_Hour), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),                   // Event
-                      NULL,                                   // Guard
-                      /*&page_setup_*/ NULL,                  // Transition
-                      (StateId)(STATE_Setup_Time_Set_Minute)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                 // Event
+                      NULL,                                 // Guard
+                      /*&page_setup_*/ NULL,                // Transition
+                      (StateId)(STATE_Setup_Time_Minute))   // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         timer.setHour(1);
                       },                                    // Transition
-                      (StateId)(STATE_Setup_Time_Set_Hour)) // Next State
+                      (StateId)(STATE_Setup_Time_Hour))     // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         timer.setHour(-1);
                       },                                    // Transition
-                      (StateId)(STATE_Setup_Time_Set_Hour)) // Next State
+                      (StateId)(STATE_Setup_Time_Hour))     // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                  // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupTime();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Time)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time))          // Next State
       ->end();
 
-  // Setup_Time_Set_Minute -> Setup_Time_Set_Second
-  fsm.addState((StateId)(STATE_Setup_Time_Set_Minute), NULL, NULL, NULL)
+  // Setup_Time_Minute -> Setup_Time_Second
+  fsm.addState((StateId)(STATE_Setup_Time_Minute), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),                   // Event
-                      NULL,                                   // Guard
-                      /*&page_setup_*/ NULL,                  // Transition
-                      (StateId)(STATE_Setup_Time_Set_Second)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                 // Event
+                      NULL,                                 // Guard
+                      /*&page_setup_*/ NULL,                // Transition
+                      (StateId)(STATE_Setup_Time_Second))   // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         timer.setMinute(1);
-                      },                                      // Transition
-                      (StateId)(STATE_Setup_Time_Set_Minute)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time_Minute))   // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         timer.setMinute(-1);
-                      },                                      // Transition
-                      (StateId)(STATE_Setup_Time_Set_Minute)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time_Minute))   // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                  // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupTime();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Time)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time))          // Next State
       ->end();
 
-  // Setup_Time_Set_Second -> Setup_Back
-  fsm.addState((StateId)(STATE_Setup_Time_Set_Second), NULL, NULL, NULL)
+  // Setup_Time_Second -> Setup_Back
+  fsm.addState((StateId)(STATE_Setup_Time_Second), NULL, NULL, NULL)
       // SET
       ->addTransition((EventId)(EVENT_SET),                 // Event
                       NULL,                                 // Guard
                       NULL,                                 // Transition
-                      (StateId)(STATE_Setup_Time_Set_Hour)) // Next State
+                      (StateId)(STATE_Setup_Time_Hour))     // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         timer.setSecond(1);
-                      },                                      // Transition
-                      (StateId)(STATE_Setup_Time_Set_Second)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time_Second))   // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         timer.setSecond(-1);
-                      },                                      // Transition
-                      (StateId)(STATE_Setup_Time_Set_Second)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time_Second))   // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                  // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupTime();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Time)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time))          // Next State
       ->end();
 
-  // SetupDate -> Setup_Date_Set_Year || Setup_Back
+  // SetupDate -> Setup_Date_Year || Setup_Back
   fsm.addState((StateId)(STATE_Setup_Date), NULL, NULL, NULL)
       // SET
       ->addTransition((EventId)(EVENT_SET),                 // Event
                       NULL,                                 // Guard
                       NULL,                                 // Transition
-                      (StateId)(STATE_Setup_Date_Set_Year)) // Next State
+                      (StateId)(STATE_Setup_Date_Year))     // Next State
 
       // P
       ->addTransition((EventId)(EVENT_P), // Event
@@ -253,173 +256,173 @@ void setup()
                       []()
                       {
                         aeon.pageSetupBirthday();
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Birthday)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Birthday))      // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupTime();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Time)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Time))          // Next State
 
       // OK
       ->addTransition((EventId)(EVENT_OK),                  // Event
                       NULL,                                 // Guard
                       NULL,                                 // Transition
-                      (StateId)(STATE_Setup_Date_Set_Year)) // Next State
+                      (StateId)(STATE_Setup_Date_Year))     // Next State
       ->end();
 
-  // Setup_Date_Set_Year -> Setup_Date_Set_Month
-  fsm.addState((StateId)(STATE_Setup_Date_Set_Year), NULL, NULL, NULL)
-      // SET
-      ->addTransition((EventId)(EVENT_SET),                  // Event
-                      NULL,                                  // Guard
-                      NULL,                                  // Transition
-                      (StateId)(STATE_Setup_Date_Set_Month)) // Next State
-
-      // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
-                      []()
-                      {
-                        timer.setYear(1);
-                      },                                    // Transition
-                      (StateId)(STATE_Setup_Date_Set_Year)) // Next State
-
-      // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
-                      []()
-                      {
-                        timer.setYear(-1);
-                      },                                    // Transition
-                      (StateId)(STATE_Setup_Date_Set_Year)) // Next State
-
-      // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
-                      []()
-                      {
-                        aeon.pageSetupDate();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Date)) // Next State
-      ->end();
-
-  // Setup_Date_Set_Month -> Setup_Date_Set_Month
-  fsm.addState((StateId)(STATE_Setup_Date_Set_Month), NULL, NULL, NULL)
-      // SET
-      ->addTransition((EventId)(EVENT_SET),                // Event
-                      NULL,                                // Guard
-                      NULL,                                // Transition
-                      (StateId)(STATE_Setup_Date_Set_Day)) // Next State
-
-      // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
-                      []()
-                      {
-                        timer.setMonth(1);
-                      },                                     // Transition
-                      (StateId)(STATE_Setup_Date_Set_Month)) // Next State
-
-      // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
-                      []()
-                      {
-                        timer.setMonth(-1);
-                      },                                     // Transition
-                      (StateId)(STATE_Setup_Date_Set_Month)) // Next State
-
-      // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
-                      []()
-                      {
-                        aeon.pageSetupDate();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Date)) // Next State
-      ->end();
-
-  // Setup_Date_Set_Day -> Setup_Date
-  fsm.addState((StateId)(STATE_Setup_Date_Set_Day), NULL, NULL, NULL)
+  // Setup_Date_Year -> Setup_Date_Month
+  fsm.addState((StateId)(STATE_Setup_Date_Year), NULL, NULL, NULL)
       // SET
       ->addTransition((EventId)(EVENT_SET),                 // Event
                       NULL,                                 // Guard
                       NULL,                                 // Transition
-                      (StateId)(STATE_Setup_Date_Set_Year)) // Next State
+                      (StateId)(STATE_Setup_Date_Month))    // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
-                        timer.setDay(1);
-                      },                                   // Transition
-                      (StateId)(STATE_Setup_Date_Set_Day)) // Next State
+                        timer.setYear(1);
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date_Year))     // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
-                        timer.setDay(-1);
-                      },                                   // Transition
-                      (StateId)(STATE_Setup_Date_Set_Day)) // Next State
+                        timer.setYear(-1);
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date_Year))     // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                  // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupDate();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Date)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date))          // Next State
+      ->end();
+
+  // Setup_Date_Month -> Setup_Date_Month
+  fsm.addState((StateId)(STATE_Setup_Date_Month), NULL, NULL, NULL)
+      // SET
+      ->addTransition((EventId)(EVENT_SET),                 // Event
+                      NULL,                                 // Guard
+                      NULL,                                 // Transition
+                      (StateId)(STATE_Setup_Date_Day))      // Next State
+
+      // P
+      ->addTransition((EventId)(EVENT_P),                   // Event
+                      NULL,                                 // Guard
+                      []()
+                      {
+                        timer.setMonth(1);
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date_Month))    // Next State
+
+      // N
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
+                      []()
+                      {
+                        timer.setMonth(-1);
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date_Month))    // Next State
+
+      // OK
+      ->addTransition((EventId)(EVENT_OK),                  // Event
+                      NULL,                                 // Guard
+                      []()
+                      {
+                        aeon.pageSetupDate();
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date))          // Next State
+      ->end();
+
+  // Setup_Date_Day -> Setup_Date
+  fsm.addState((StateId)(STATE_Setup_Date_Day), NULL, NULL, NULL)
+      // SET
+      ->addTransition((EventId)(EVENT_SET),                 // Event
+                      NULL,                                 // Guard
+                      NULL,                                 // Transition
+                      (StateId)(STATE_Setup_Date_Year))     // Next State
+
+      // P
+      ->addTransition((EventId)(EVENT_P),                   // Event
+                      NULL,                                 // Guard
+                      []()
+                      {
+                        timer.setDay(1);
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date_Day))      // Next State
+
+      // N
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
+                      []()
+                      {
+                        timer.setDay(-1);
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date_Day))      // Next State
+
+      // OK
+      ->addTransition((EventId)(EVENT_OK),                  // Event
+                      NULL,                                 // Guard
+                      []()
+                      {
+                        aeon.pageSetupDate();
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date))          // Next State
       ->end();
 
   // Setup_Birthday -> Setup_Birthday_Year || Setup_Back
   fsm.addState((StateId)(STATE_Setup_Birthday), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),                     // Event
-                      NULL,                                     // Guard
-                      NULL,                                     // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Year)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                 // Event
+                      NULL,                                 // Guard
+                      NULL,                                 // Transition
+                      (StateId)(STATE_Setup_Birthday_Year)) // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupSex();
-                      },                          // Transition
-                      (StateId)(STATE_Setup_Sex)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Sex))           // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                   // Event
+                      NULL,                                 // Guard
                       []()
                       {
                         aeon.pageSetupDate();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Date)) // Next State
+                      },                                    // Transition
+                      (StateId)(STATE_Setup_Date))          // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK),                      // Event
-                      NULL,                                     // Guard
-                      NULL,                                     // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Year)) // Next State
+      ->addTransition((EventId)(EVENT_OK),                  // Event
+                      NULL,                                 // Guard
+                      NULL,                                 // Transition
+                      (StateId)(STATE_Setup_Birthday_Year)) // Next State
       ->end();
 
-  // Setup_Birthday_Set_Year -> Setup_Birthday_Set_Month
-  fsm.addState((StateId)(STATE_Setup_Birthday_Set_Year), NULL, NULL, NULL)
+  // Setup_Birthday_Year -> Setup_Birthday_Month
+  fsm.addState((StateId)(STATE_Setup_Birthday_Year), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),                      // Event
-                      NULL,                                      // Guard
-                      NULL,                                      // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Month)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                   // Event
+                      NULL,                                   // Guard
+                      NULL,                                   // Transition
+                      (StateId)(STATE_Setup_Birthday_Month))  // Next State
 
       // P
       ->addTransition((EventId)(EVENT_P), // Event
@@ -428,8 +431,8 @@ void setup()
                       {
                         rom.setBirthdayYear(+1);
                         rom.saveToEEPROM();
-                      },                                        // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Year)) // Next State
+                      },                                      // Transition
+                      (StateId)(STATE_Setup_Birthday_Year))   // Next State
 
       // N
       ->addTransition((EventId)(EVENT_N), // Event
@@ -438,8 +441,8 @@ void setup()
                       {
                         rom.setBirthdayYear(-1);
                         rom.saveToEEPROM();
-                      },                                        // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Year)) // Next State
+                      },                                      // Transition
+                      (StateId)(STATE_Setup_Birthday_Year))   // Next State
 
       // OK
       ->addTransition((EventId)(EVENT_OK), // Event
@@ -447,17 +450,17 @@ void setup()
                       []()
                       {
                         aeon.pageSetupBirthday();
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Birthday)) // Next State
+                      },                                      // Transition
+                      (StateId)(STATE_Setup_Birthday))        // Next State
       ->end();
 
-  // Setup_Birthday_Set_Month -> Setup_Birthday_Set_Day
-  fsm.addState((StateId)(STATE_Setup_Birthday_Set_Month), NULL, NULL, NULL)
+  // Setup_Birthday_Month -> Setup_Birthday_Day
+  fsm.addState((StateId)(STATE_Setup_Birthday_Month), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),                    // Event
-                      NULL,                                    // Guard
-                      NULL,                                    // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Day)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                   // Event
+                      NULL,                                   // Guard
+                      NULL,                                   // Transition
+                      (StateId)(STATE_Setup_Birthday_Day))    // Next State
 
       // P
       ->addTransition((EventId)(EVENT_P), // Event
@@ -466,8 +469,8 @@ void setup()
                       {
                         rom.setBirthdayMonth(+1);
                         rom.saveToEEPROM();
-                      },                                         // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Month)) // Next State
+                      },                                      // Transition
+                      (StateId)(STATE_Setup_Birthday_Month))  // Next State
 
       // N
       ->addTransition((EventId)(EVENT_N), // Event
@@ -476,8 +479,8 @@ void setup()
                       {
                         rom.setBirthdayMonth(-1);
                         rom.saveToEEPROM();
-                      },                                         // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Month)) // Next State
+                      },                                      // Transition
+                      (StateId)(STATE_Setup_Birthday_Month))  // Next State
 
       // OK
       ->addTransition((EventId)(EVENT_OK), // Event
@@ -485,17 +488,17 @@ void setup()
                       []()
                       {
                         aeon.pageSetupBirthday();
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Birthday)) // Next State
+                      },                                      // Transition
+                      (StateId)(STATE_Setup_Birthday))        // Next State
       ->end();
 
-  // Setup_Birthday_Set_Day -> Setup_Birthday_Set_Year
-  fsm.addState((StateId)(STATE_Setup_Birthday_Set_Day), NULL, NULL, NULL)
+  // Setup_Birthday_Day -> Setup_Birthday_Year
+  fsm.addState((StateId)(STATE_Setup_Birthday_Day), NULL, NULL, NULL)
       // SET
       ->addTransition((EventId)(EVENT_SET),                     // Event
                       NULL,                                     // Guard
                       NULL,                                     // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Year)) // Next State
+                      (StateId)(STATE_Setup_Birthday_Year))     // Next State
 
       // P
       ->addTransition((EventId)(EVENT_P), // Event
@@ -504,8 +507,8 @@ void setup()
                       {
                         rom.setBirthdayDay(+1);
                         rom.saveToEEPROM();
-                      },                                       // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Day)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Birthday_Day))      // Next State
 
       // N
       ->addTransition((EventId)(EVENT_N), // Event
@@ -514,322 +517,393 @@ void setup()
                       {
                         rom.setBirthdayDay(-1);
                         rom.saveToEEPROM();
-                      },                                       // Transition
-                      (StateId)(STATE_Setup_Birthday_Set_Day)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Birthday_Day))      // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupBirthday();
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Birthday)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Birthday))          // Next State
       ->end();
 
   // Setup_Sex -> Setup_Sex_Set
   fsm.addState((StateId)(STATE_Setup_Sex), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),           // Event
-                      NULL,                           // Guard
-                      NULL,                           // Transition
-                      (StateId)(STATE_Setup_Sex_Set)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Sex_Set))           // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupLifespan();
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Lifespan)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Lifespan))          // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupBirthday();
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Birthday)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Birthday))          // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupSex();
-                      },                              // Transition
-                      (StateId)(STATE_Setup_Sex_Set)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Sex_Set))           // Next State
       ->end();
 
   // Setup_Sex_Set -> Setup_Sex
   fsm.addState((StateId)(STATE_Setup_Sex_Set), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),           // Event
-                      NULL,                           // Guard
-                      NULL,                           // Transition
-                      (StateId)(STATE_Setup_Sex_Set)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Sex_Set))           // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
-                        rom.setSex();
+                        rom.switchSex();
                         rom.saveToEEPROM();
-                      },                              // Transition
-                      (StateId)(STATE_Setup_Sex_Set)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Sex_Set))           // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
-                        rom.setSex();
+                        rom.switchSex();
                         rom.saveToEEPROM();
-                      },                              // Transition
-                      (StateId)(STATE_Setup_Sex_Set)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Sex_Set))           // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupSex();
-                      },                          // Transition
-                      (StateId)(STATE_Setup_Sex)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Sex))               // Next State
       ->end();
 
   // Setup_Lifespan -> Setup_Lifespan_Set
   fsm.addState((StateId)(STATE_Setup_Lifespan), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),                // Event
-                      NULL,                                // Guard
-                      NULL,                                // Transition
-                      (StateId)(STATE_Setup_Lifespan_Set)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Lifespan_Set))      // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
-                        aeon.pageSetupReset();
-                      },                            // Transition
-                      (StateId)(STATE_Setup_Reset)) // Next State
+                        aeon.pageSetupLanguage();
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Language))             // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupSex();
-                      },                          // Transition
-                      (StateId)(STATE_Setup_Sex)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Sex))               // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK),                 // Event
-                      NULL,                                // Guard
-                      /*&pageSetupSex*/ NULL,              // Transition
-                      (StateId)(STATE_Setup_Lifespan_Set)) // Next State
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
+                      /*&pageSetupSex*/ NULL,                   // Transition
+                      (StateId)(STATE_Setup_Lifespan_Set))      // Next State
       ->end();
 
   // Setup_Lifespan_Set -> Setup_Lifespan
   fsm.addState((StateId)(STATE_Setup_Lifespan_Set), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),            // Event
-                      NULL,                            // Guard
-                      NULL,                            // Transition
-                      (StateId)(STATE_Setup_Lifespan)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Lifespan))          // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         rom.setLifespan(+1);
                         rom.saveToEEPROM();
-                      },                                   // Transition
-                      (StateId)(STATE_Setup_Lifespan_Set)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Lifespan_Set))      // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         rom.setLifespan(-1);
                         rom.saveToEEPROM();
-                      },                                   // Transition
-                      (StateId)(STATE_Setup_Lifespan_Set)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Lifespan_Set))      // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupLifespan();
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Lifespan)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Lifespan))          // Next State
+      ->end();
+
+  // Setup_Language -> Setup_Language_Set
+  fsm.addState((StateId)(STATE_Setup_Language), NULL, NULL, NULL)
+      // SET
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Language_Set))      // Next State
+
+      // P
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
+                      []()
+                      {
+                        aeon.pageSetupReset();
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Reset))          // Next State
+
+      // N
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
+                      []()
+                      {
+                        aeon.pageSetupLifespan();
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Lifespan))          // Next State
+
+      // OK
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Language_Set))           // Next State
+      ->end();
+
+  // Setup_Language_Set -> Setup_Language
+  fsm.addState((StateId)(STATE_Setup_Language_Set), NULL, NULL, NULL)
+      // SET
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Language))          // Next State
+
+      // P
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
+                      []()
+                      {
+                        rom.setLanguage(1);
+                        rom.saveToEEPROM();
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Language_Set))      // Next State
+
+      // N
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
+                      []()
+                      {
+                        rom.setLanguage(-1);
+                        rom.saveToEEPROM();
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Language_Set))      // Next State
+
+      // OK
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
+                      []()
+                      {
+                        aeon.pageSetupLanguage();
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Language))          // Next State
       ->end();
 
   // Setup_Birthday -> Setup_Reset
   fsm.addState((StateId)(STATE_Setup_Reset), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),            // Event
-                      NULL,                            // Guard
-                      NULL,                            // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupBack();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Back)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Back))              // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
-                        aeon.pageSetupLifespan();
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Lifespan)) // Next State
+                        aeon.pageSetupLanguage();
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Language))          // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK),             // Event
-                      NULL,                            // Guard
-                      /*&page_base*/ NULL,             // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
       ->end();
 
   // Setup_Reset_No -> Setup_Reset_Yes
   fsm.addState((StateId)(STATE_Setup_Reset_No), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),             // Event
-                      NULL,                             // Guard
-                      NULL,                             // Transition
-                      (StateId)(STATE_Setup_Reset_Yes)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Reset_Yes))         // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P),               // Event
-                      NULL,                             // Guard
-                      /*&pageSetupReset*/ NULL,         // Transition
-                      (StateId)(STATE_Setup_Reset_Yes)) // Next State
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Reset_Yes))         // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N),               // Event
-                      NULL,                             // Guard
-                      /*&pageSetupReset*/ NULL,         // Transition
-                      (StateId)(STATE_Setup_Reset_Yes)) // Next State
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Reset_Yes))         // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupReset();
-                      },                            // Transition
-                      (StateId)(STATE_Setup_Reset)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Reset))             // Next State
       ->end();
 
   // Setup_Reset_No -> Setup_Reset_Yes
   fsm.addState((StateId)(STATE_Setup_Reset_Yes), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),            // Event
-                      NULL,                            // Guard
-                      NULL,                            // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P),              // Event
-                      NULL,                            // Guard
-                      /*&pageSetupReset*/ NULL,        // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
+                      /*&pageSetupReset*/ NULL,                 // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N),              // Event
-                      NULL,                            // Guard
-                      /*&pageSetupReset*/ NULL,        // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
+                      /*&pageSetupReset*/ NULL,                 // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK),                // Event
-                      NULL,                               // Guard
-                      /*&pageSetupReset*/ NULL,           // Transition
-                      (StateId)(STATE_Setup_Reset_Count)) // Next State
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
+                      /*&pageSetupReset*/ NULL,                 // Transition
+                      (StateId)(STATE_Setup_Reset_Count))       // Next State
       ->end();
 
   // Setup_Reset_No -> Setup_Reset_Yes
   fsm.addState((StateId)(STATE_Setup_Reset_Count), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),            // Event
-                      NULL,                            // Guard
-                      NULL,                            // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P),              // Event
-                      NULL,                            // Guard
-                      /*&pageSetupReset*/ NULL,        // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
+                      /*&pageSetupReset*/ NULL,                 // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N),              // Event
-                      NULL,                            // Guard
-                      /*&pageSetupReset*/ NULL,        // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
+                      /*&pageSetupReset*/ NULL,                 // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         resetFinal(false);
-                      },                               // Transition
-                      (StateId)(STATE_Setup_Reset_No)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Reset_No))          // Next State
       ->end();
 
   // Setup_Back -> Setup_Time || Base
   fsm.addState((StateId)(STATE_Setup_Back), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET),  // Event
-                      NULL,                  // Guard
-                      NULL,                  // Transition
-                      (StateId)(STATE_Base)) // Next State
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Base))                    // Next State
 
       // P
-      ->addTransition((EventId)(EVENT_P), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_P),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupTime();
-                      },                           // Transition
-                      (StateId)(STATE_Setup_Time)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Time))              // Next State
 
       // N
-      ->addTransition((EventId)(EVENT_N), // Event
-                      NULL,               // Guard
+      ->addTransition((EventId)(EVENT_N),                       // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         aeon.pageSetupReset();
-                      },                            // Transition
-                      (StateId)(STATE_Setup_Reset)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Setup_Reset))             // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK),   // Event
-                      NULL,                  // Guard
-                      /*&page_base*/ NULL,   // Transition
-                      (StateId)(STATE_Base)) // Next State
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
+                      NULL,                                     // Transition
+                      (StateId)(STATE_Base))                    // Next State
       ->end();
 
   // ERROR -> Base
   fsm.addState((StateId)(STATE_ERROR), NULL, NULL, NULL)
       // SET
-      ->addTransition((EventId)(EVENT_SET), // Event
-                      NULL,                 // Guard
+      ->addTransition((EventId)(EVENT_SET),                     // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         globalErrorStates.return_ROM = EReturn_ROM::ROM_RETURN_NULL;
@@ -838,25 +912,25 @@ void setup()
                         rom.resetErrorStateRom();
                         timer.resetErrorStateTime();
                         aeon.resetErrorStateDisplay();
-                      },                     // Transition
-                      (StateId)(STATE_Base)) // Next State
+                      },                                        // Transition
+                      (StateId)(STATE_Base))                    // Next State
 
       /*/ P
-        ->addTransition((EventId)(EVENT_P), // Event
-                        NULL,               // Guard
-                        NULL,               // Transition
-                        NULL)               // Next State
+        ->addTransition((EventId)(EVENT_P),                     // Event
+                        NULL,                                   // Guard
+                        NULL,                                   // Transition
+                        NULL)                                   // Next State
 
         // N
-        ->addTransition((EventId)(EVENT_N), // Event
-                        NULL,               // Guard
-                        NULL,               // Transition
+        ->addTransition((EventId)(EVENT_N),                     // Event
+                        NULL,                                   // Guard
+                        NULL,                                   // Transition
                         NULL)*/
       // Next State
 
       // OK
-      ->addTransition((EventId)(EVENT_OK), // Event
-                      NULL,                // Guard
+      ->addTransition((EventId)(EVENT_OK),                      // Event
+                      NULL,                                     // Guard
                       []()
                       {
                         globalErrorStates.return_ROM = EReturn_ROM::ROM_RETURN_NULL;
@@ -952,7 +1026,7 @@ void loopButton()
     {
     // Pressed short
     case (EPressed::SHORT):
-      fsm.dispatch(static_cast<EEvents>(i));
+      fsm.dispatch(static_cast<EEvent>(i));
       break;
 
     // Pressed long
@@ -976,67 +1050,71 @@ void loopPages()
 
   switch (fsm.getCurrentStateId())
   {
-  case (EStates::STATE_Base):
+  case (EState::STATE_Base):
     aeon.pageBase(now.year(), now.month() - 1, now.day(), now.dayOfTheWeek(), now.hour(), now.minute(), now.second(), calcLifetime());
     break;
 
-  case (EStates::STATE_Setup_Date_Set_Year):
-    aeon.pageSetupDate_set_date(aeon.Year, now.year(), now.month() - 1, now.day());
+  case (EState::STATE_Setup_Time_Hour):
+    aeon.pageSetupTime_set_time(EState::STATE_Setup_Time_Hour, now.hour(), now.minute(), now.second());
     break;
 
-  case (EStates::STATE_Setup_Date_Set_Month):
-    aeon.pageSetupDate_set_date(aeon.Month, now.year(), now.month() - 1, now.day());
+  case (EState::STATE_Setup_Time_Minute):
+    aeon.pageSetupTime_set_time(EState::STATE_Setup_Time_Minute, now.hour(), now.minute(), now.second());
     break;
 
-  case (EStates::STATE_Setup_Date_Set_Day):
-    aeon.pageSetupDate_set_date(aeon.Day, now.year(), now.month() - 1, now.day());
+  case (EState::STATE_Setup_Time_Second):
+    aeon.pageSetupTime_set_time(EState::STATE_Setup_Time_Second, now.hour(), now.minute(), now.second());
     break;
 
-  case (EStates::STATE_Setup_Time_Set_Hour):
-    aeon.pageSetupTime_set_time(aeon.Hour, now.hour(), now.minute(), now.second());
+  case (EState::STATE_Setup_Date_Year):
+    aeon.pageSetupDate_set_date(EState::STATE_Setup_Date_Year, now.year(), now.month() - 1, now.day());
     break;
 
-  case (EStates::STATE_Setup_Time_Set_Minute):
-    aeon.pageSetupTime_set_time(aeon.Minute, now.hour(), now.minute(), now.second());
+  case (EState::STATE_Setup_Date_Month):
+    aeon.pageSetupDate_set_date(EState::STATE_Setup_Date_Month, now.year(), now.month() - 1, now.day());
     break;
 
-  case (EStates::STATE_Setup_Time_Set_Second):
-    aeon.pageSetupTime_set_time(aeon.Second, now.hour(), now.minute(), now.second());
+  case (EState::STATE_Setup_Date_Day):
+    aeon.pageSetupDate_set_date(EState::STATE_Setup_Date_Day, now.year(), now.month() - 1, now.day());
     break;
 
-  case (EStates::STATE_Setup_Birthday_Set_Year):
-    aeon.pageSetupBirthday_set_date(aeon.B_Year, rom.getBirthdayYear(), rom.getBirthdayMonth(), rom.getBirthdayDay());
+  case (EState::STATE_Setup_Birthday_Year):
+    aeon.pageSetupBirthday_set_date(EState::STATE_Setup_Birthday_Year, rom.getBirthdayYear(), rom.getBirthdayMonth(), rom.getBirthdayDay());
     break;
 
-  case (EStates::STATE_Setup_Birthday_Set_Month):
-    aeon.pageSetupBirthday_set_date(aeon.B_Month, rom.getBirthdayYear(), rom.getBirthdayMonth(), rom.getBirthdayDay());
+  case (EState::STATE_Setup_Birthday_Month):
+    aeon.pageSetupBirthday_set_date(EState::STATE_Setup_Birthday_Month, rom.getBirthdayYear(), rom.getBirthdayMonth(), rom.getBirthdayDay());
     break;
 
-  case (EStates::STATE_Setup_Birthday_Set_Day):
-    aeon.pageSetupBirthday_set_date(aeon.B_Day, rom.getBirthdayYear(), rom.getBirthdayMonth(), rom.getBirthdayDay());
+  case (EState::STATE_Setup_Birthday_Day):
+    aeon.pageSetupBirthday_set_date(EState::STATE_Setup_Birthday_Day, rom.getBirthdayYear(), rom.getBirthdayMonth(), rom.getBirthdayDay());
     break;
 
-  case (EStates::STATE_Setup_Sex_Set):
+  case (EState::STATE_Setup_Sex_Set):
     aeon.pageSetupSex_set(rom.getSex());
     break;
 
-  case (EStates::STATE_Setup_Lifespan_Set):
+  case (EState::STATE_Setup_Lifespan_Set):
     aeon.pageSetupLifespan_set(rom.getLifespan());
     break;
 
-  case (EStates::STATE_Setup_Reset_Yes):
-    aeon.pageSetupReset_set(aeon.Reset_Yes);
+  case (EState::STATE_Setup_Language_Set):
+    aeon.pageSetupLanguage_set(rom.getLanguage());
     break;
 
-  case (EStates::STATE_Setup_Reset_No):
-    aeon.pageSetupReset_set(aeon.Reset_No);
+  case (EState::STATE_Setup_Reset_Yes):
+    aeon.pageSetupReset_set(EState::STATE_Setup_Reset_Yes);
     break;
 
-  case (EStates::STATE_Setup_Reset_Count):
+  case (EState::STATE_Setup_Reset_No):
+    aeon.pageSetupReset_set(EState::STATE_Setup_Reset_No);
+    break;
+
+  case (EState::STATE_Setup_Reset_Count):
     resetFinal(true);
     break;
 
-  case (EStates::STATE_ERROR):
+  case (EState::STATE_ERROR):
     pageStateError();
     break;
 

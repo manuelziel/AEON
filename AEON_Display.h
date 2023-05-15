@@ -12,12 +12,7 @@ to the caller if an error occurs during execution.
 #define AEON_DISPLAY_h
 
 #include <Arduino.h>
-
-enum EReturn_DISPLAY
-{
-  DISPLAY_RETURN_NULL,           
-  ERROR_DISPLAY_ALLOCATION_FAILD
-};
+#include "AEON_Enums.h"
 
 class AEON_Display
 {
@@ -43,26 +38,12 @@ private:
  EReturn_DISPLAY lastErrorState; 
 
 public:
-  enum EPage
-  {
-    Year,
-    Month,
-    Day,
-    Hour,
-    Minute,
-    Second,
-    B_Year,
-    B_Month,
-    B_Day,
-    Reset_Yes,
-    Reset_No
-  };
 
   EReturn_DISPLAY setupDisplay();
   void loopDisplay();
-
   void clearDisplay();
   void setDisplay();
+  
   void setTextSize(int i);
   void setCurs(int y, int x);
   void printInt(int i);
@@ -73,17 +54,19 @@ public:
   // Pages
   void pageBase(int year, int month, int day, int dayOfTheWeek, int hour, int minute, int second, int lifetime);
   void pageSetupTime();
-  void pageSetupTime_set_time(EPage p, int hour, int minute, int second);
+  void pageSetupTime_set_time(EState state, int hour, int minute, int second);
   void pageSetupDate();
-  void pageSetupDate_set_date(EPage p, int year, int month, int day);
+  void pageSetupDate_set_date(EState state, int year, int month, int day);
   void pageSetupBirthday();
-  void pageSetupBirthday_set_date(EPage p, int year, int month, int day);
+  void pageSetupBirthday_set_date(EState state, int year, int month, int day);
   void pageSetupSex();
-  void pageSetupSex_set(int sex);
+  void pageSetupSex_set(ESex sex);
   void pageSetupLifespan();
   void pageSetupLifespan_set(int lifespan);
+  void pageSetupLanguage();
+  void pageSetupLanguage_set(ELanguage language);
   void pageSetupReset();
-  void pageSetupReset_set(EPage p);
+  void pageSetupReset_set(EState state);
   void pageSetupReset_count_final(int cnt_reset);
   void pageSetupBack();
   void pageERROR(char *errorText);

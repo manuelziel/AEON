@@ -13,6 +13,7 @@ const byte BUTTON_PIN = 7;
 
 #include <Arduino.h>
 #include <chrono>
+#include "AEON_Enums.h"
 #include "AEON_Time.h"
 #include "RTClib.h"
 

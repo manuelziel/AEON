@@ -5,6 +5,7 @@ AEON_ROM.cpp
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <time.h>
+#include "AEON_Enums.h"
 #include "AEON_Global.h"
 #include "AEON_ROM.h"
 
@@ -71,8 +72,9 @@ void AEON_ROM::saveToEEPROM()
       this->birthdayMonth,
       this->birthdayDay,
       this->sex,
-      this->lifespanWoman,
-      this->lifespanMan,
+      this->lifespanFemale,
+      this->lifespanMale,
+      this->language,
   };
 
   // Write the array of values to EEPROM at the specified address.
@@ -103,20 +105,22 @@ void AEON_ROM::getEEPROM()
     this->birthdayYear      = arrayContent[1];
     this->birthdayMonth     = arrayContent[2];
     this->birthdayDay       = arrayContent[3];
-    this->sex               = arrayContent[4];
-    this->lifespanWoman     = arrayContent[5];
-    this->lifespanMan       = arrayContent[6];
+    this->sex               = static_cast<ESex>(arrayContent[4]);
+    this->lifespanFemale    = arrayContent[5];
+    this->lifespanMale      = arrayContent[6];
+    this->language          = static_cast<ELanguage>(arrayContent[7]);
   }
 
   // Print the loaded data to the Serial Monitor
-  Serial.printf("Init: %d, Birthday Year: %d, Birthday Month: %d, Birthday Day: %d, Sex: %d, Lifespan Woman: %d, Lifespan Man: %d",
+  Serial.printf("Init: %d, Birthday Year: %d, Birthday Month: %d, Birthday Day: %d, Sex: %d, Lifespan Female: %d, Lifespan Male: %d, Language: %d",
                 this->init,
                 this->birthdayYear,
                 this->birthdayMonth,
                 this->birthdayDay,
                 this->sex,
-                this->lifespanWoman,
-                this->lifespanMan);
+                this->lifespanFemale,
+                this->lifespanMale,
+                this->language);
 
   Serial.println();
 }
@@ -126,12 +130,13 @@ Set defaults for RAM and save to ROM
 */
 void AEON_ROM::resetEEPROM()
 {
-  this->birthdayYear  = GLOBAL_DEFAULTS::defaultBirthdayYear;
-  this->birthdayMonth = GLOBAL_DEFAULTS::defaultBirthdayMonth;
-  this->birthdayDay   = GLOBAL_DEFAULTS::defaultBirthdayDay;
-  this->sex           = GLOBAL_DEFAULTS::defaultSex;
-  this->lifespanWoman = GLOBAL_DEFAULTS::defaultLifespanWoman;
-  this->lifespanMan   = GLOBAL_DEFAULTS::defaultLifespanMan;
+  this->birthdayYear    = GLOBAL_DEFAULTS::defaultBirthdayYear;
+  this->birthdayMonth   = GLOBAL_DEFAULTS::defaultBirthdayMonth;
+  this->birthdayDay     = GLOBAL_DEFAULTS::defaultBirthdayDay;
+  this->sex             = GLOBAL_DEFAULTS::defaultSex;
+  this->lifespanFemale  = GLOBAL_DEFAULTS::defaultLifespanFemale;
+  this->lifespanMale    = GLOBAL_DEFAULTS::defaultLifespanMale;
+  this->language        = GLOBAL_DEFAULTS::defaultLanguage;
   Serial.println("Set Defaults and reset EEPROM");
   saveToEEPROM();
 }
@@ -249,23 +254,23 @@ void AEON_ROM::setBirthdayDay(int value)
 /*
 Get the sex
 */
-int AEON_ROM::getSex()
+ESex AEON_ROM::getSex()
 {
   return this->sex;
 }
 
 /*
-Set the sex.
+Switch the sex.
 */
-void AEON_ROM::setSex()
+void AEON_ROM::switchSex()
 {
-  if (this->sex == 0)
+  if (this->sex == ESex::Female)
   {
-    this->sex = 1;  // Man
+    this->sex = ESex::Male;
   }
   else
   {
-    this->sex = 0;  // Woman
+    this->sex = ESex::Female;
   }
 }
 
@@ -276,13 +281,13 @@ int AEON_ROM::getLifespan()
 {
   int value;
 
-  if (this->sex == ESex::Woman)
+  if (this->sex == ESex::Female)
   {
-    value = this->lifespanWoman;
+    value = this->lifespanFemale;
   }
-  else if (this->sex == ESex::Man)
+  else if (this->sex == ESex::Male)
   {
-    value = this->lifespanMan;
+    value = this->lifespanMale;
   }
   return value;
 }
@@ -295,29 +300,67 @@ void AEON_ROM::setLifespan(int value)
 {
   if (value > 0)
   {
-    // If the person is a woman, increment the lifespan of women.
-    if (this->sex == ESex::Woman){
-      this->lifespanWoman++;
+    // If the person is female, increment the lifespan of female.
+    if (this->sex == ESex::Female){
+      this->lifespanFemale++;
     }
 
-    // If the person is a man, increment the lifespan of men.
-    else if (this->sex == ESex::Man)
+    // If the person is male, increment the lifespan of male.
+    else if (this->sex == ESex::Male)
     {
-      this->lifespanMan++;
+      this->lifespanMale++;
     }
   }
   else if (value < 0)
   {
-    // If the person is a woman, decrement the lifespan of women.
-    if (this->sex == ESex::Woman){
-      this->lifespanWoman--;
+    // If the person is female, decrement the lifespan of female.
+    if (this->sex == ESex::Female){
+      this->lifespanFemale--;
     }
-    // If the person is a man, decrement the lifespan of men.
-    else if (this->sex == ESex::Man)
+    // If the person is male, decrement the lifespan of male.
+    else if (this->sex == ESex::Male)
     {
-      this->lifespanMan--;
+      this->lifespanMale--;
     }
   }
+}
+
+/*
+Get Language
+*/
+ELanguage AEON_ROM::getLanguage()
+{
+  return this->language;
+}
+
+/*
+Sets the language 
+*/
+void AEON_ROM::setLanguage(int value)
+{
+    //int numLanguages = std::size(ELanguage{});            // c++17
+    int numLanguages = static_cast<int>(ELanguage::Count); //
+    int currentLanguageIndex = static_cast<int>(this->language);
+
+    // Next Language
+    if (value > 0)
+    {
+        currentLanguageIndex = (currentLanguageIndex + 1) % numLanguages;
+    }
+    // Previous Language
+    else if (value < 0)
+    {
+        currentLanguageIndex = (currentLanguageIndex - 1 + numLanguages) % numLanguages;
+    }
+    // Invalid value - keep language
+    else
+    {
+        return;
+    }
+
+    language = static_cast<ELanguage>(currentLanguageIndex);
+  
+  this->language = language;
 }
 
 /*
