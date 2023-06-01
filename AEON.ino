@@ -11,13 +11,6 @@ The Project uses the following components:
   - W25Q128JWPIQ (SPI) (128 Mbit - 16MB)
 - RP2040 microcontroller (16MB noFS / 8MB-8MB FS, Generic SPI/2, 133MHz, C++ Exceptions Enabled, Pico SDK)
 
-Pick one up today!
-------> http://www.ManuelZiel.com
-
-Manuel Ziel invests time and resources providing this open
-source code, please support AEON and open-source
-hardware by purchasing products from Manuel Ziel!
-
 Written by Manuel Ziel, with contributions from the open source community.
 Special thanks to Daniel Fritsch.
 
