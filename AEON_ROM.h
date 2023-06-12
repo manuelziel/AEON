@@ -56,6 +56,7 @@ public:
   void setBirthdayDay(int value);
   void switchSex();
   void setLifespan(int value);
+  void updateDefaultLifespan();
   void setLanguage(int value);
   void resetErrorStateRom();
 

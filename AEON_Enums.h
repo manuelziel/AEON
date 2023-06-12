@@ -87,6 +87,8 @@ enum ESex {
 enum ELanguage {
   English,
   German,
+  French,
+  Spain,
   Count // To count all Languages
 };
 

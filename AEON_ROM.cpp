@@ -1,5 +1,5 @@
-/* 
-AEON_ROM.cpp 
+/*
+AEON_ROM.cpp
 */
 
 #include <Arduino.h>
@@ -9,7 +9,7 @@ AEON_ROM.cpp
 #include "AEON_Global.h"
 #include "AEON_ROM.h"
 
-/* 
+/*
 ROM
 */
 EReturn_ROM AEON_ROM::setupEEPROM()
@@ -39,7 +39,7 @@ EReturn_ROM AEON_ROM::setupEEPROM()
     EEPROM.write(stoAdd, wrtnSig); // EEPROM need 3,3 millisec to save!
     resetEEPROM();
     localReturn = EReturn_ROM::ERROR_EEPROM_NOT_VALID_DATA;
-    
+
     // Commit ROM
     if (!EEPROM.commit())
     {
@@ -79,10 +79,10 @@ void AEON_ROM::saveToEEPROM()
 
   // Write the array of values to EEPROM at the specified address.
   if (!writeIntArrayIntoEEPROM(EEPROM_ADDRESS, contentArray, ARRAY_SIZE))
-    {
-      //Define an error code for EEPROM write failure.
-      localReturn = EReturn_ROM::ERROR_EEPROM_COMMIT_FAILD;
-    }
+  {
+    // Define an error code for EEPROM write failure.
+    localReturn = EReturn_ROM::ERROR_EEPROM_COMMIT_FAILD;
+  }
 }
 
 /*
@@ -102,13 +102,13 @@ void AEON_ROM::getEEPROM()
   this->init = arrayContent[0];
   if (this->init)
   {
-    this->birthdayYear      = arrayContent[1];
-    this->birthdayMonth     = arrayContent[2];
-    this->birthdayDay       = arrayContent[3];
-    this->sex               = static_cast<ESex>(arrayContent[4]);
-    this->lifespanFemale    = arrayContent[5];
-    this->lifespanMale      = arrayContent[6];
-    this->language          = static_cast<ELanguage>(arrayContent[7]);
+    this->birthdayYear = arrayContent[1];
+    this->birthdayMonth = arrayContent[2];
+    this->birthdayDay = arrayContent[3];
+    this->sex = static_cast<ESex>(arrayContent[4]);
+    this->lifespanFemale = arrayContent[5];
+    this->lifespanMale = arrayContent[6];
+    this->language = static_cast<ELanguage>(arrayContent[7]);
   }
 
   // Print the loaded data to the Serial Monitor
@@ -130,13 +130,13 @@ Set defaults for RAM and save to ROM
 */
 void AEON_ROM::resetEEPROM()
 {
-  this->birthdayYear    = GLOBAL_DEFAULTS::defaultBirthdayYear;
-  this->birthdayMonth   = GLOBAL_DEFAULTS::defaultBirthdayMonth;
-  this->birthdayDay     = GLOBAL_DEFAULTS::defaultBirthdayDay;
-  this->sex             = GLOBAL_DEFAULTS::defaultSex;
-  this->lifespanFemale  = GLOBAL_DEFAULTS::defaultLifespanFemale;
-  this->lifespanMale    = GLOBAL_DEFAULTS::defaultLifespanMale;
-  this->language        = GLOBAL_DEFAULTS::defaultLanguage;
+  this->birthdayYear = GLOBAL_DEFAULTS::defaultBirthdayYear;
+  this->birthdayMonth = GLOBAL_DEFAULTS::defaultBirthdayMonth;
+  this->birthdayDay = GLOBAL_DEFAULTS::defaultBirthdayDay;
+  this->sex = GLOBAL_DEFAULTS::defaultSex;
+  this->lifespanFemale = GLOBAL_DEFAULTS::defaultLifespanFemale[this->language];
+  this->lifespanMale = GLOBAL_DEFAULTS::defaultLifespanMale[this->language];
+  this->language = GLOBAL_DEFAULTS::defaultLanguage;
   Serial.println("Set Defaults and reset EEPROM");
   saveToEEPROM();
 }
@@ -190,7 +190,7 @@ int AEON_ROM::getBirthdayMonth()
 
 /*
 Set new birthday month
-Increment or decrement the birthday month by one. 
+Increment or decrement the birthday month by one.
 */
 void AEON_ROM::setBirthdayMonth(int value)
 {
@@ -204,8 +204,9 @@ void AEON_ROM::setBirthdayMonth(int value)
   {
     this->birthdayMonth = EMonth::December;
   }
-    // Increment or decrement the month based on the input value
-  else {
+  // Increment or decrement the month based on the input value
+  else
+  {
     this->birthdayMonth += value;
   }
 }
@@ -231,22 +232,26 @@ void AEON_ROM::setBirthdayDay(int value)
   int lastDayOfMonth = b_day.tm_mday == 31 ? 31 : 31 - b_day.tm_mday;
 
   // If value is 1 and the current day is the last day of the month, set the day to 1
-  if (value == 1 && this->birthdayDay == lastDayOfMonth) {
+  if (value == 1 && this->birthdayDay == lastDayOfMonth)
+  {
     this->birthdayDay = 1;
   }
 
   // If value is -1 and the current day is the first day of the month, set the day to the last day of the previous month
-  else if (value == -1 && this->birthdayDay == 1) {
+  else if (value == -1 && this->birthdayDay == 1)
+  {
     this->birthdayDay = lastDayOfMonth;
   }
 
   // If value is 1 and the current day is not the last day of the month, increment the day
-  else if (value == 1 && this->birthdayDay < lastDayOfMonth) {
+  else if (value == 1 && this->birthdayDay < lastDayOfMonth)
+  {
     this->birthdayDay++;
   }
 
   // If value is -1 and the current day is not the first day of the month, decrement the day
-  else if (value == -1 && this->birthdayDay > 1) {
+  else if (value == -1 && this->birthdayDay > 1)
+  {
     this->birthdayDay--;
   }
 }
@@ -275,7 +280,7 @@ void AEON_ROM::switchSex()
 }
 
 /*
-Get Lifespan 
+Get Lifespan
 */
 int AEON_ROM::getLifespan()
 {
@@ -294,14 +299,15 @@ int AEON_ROM::getLifespan()
 
 /*
 Sets the lifespan value based on the provided value and the person's sex.
-value: the value by which the lifespan should be adjusted (+1 for increase, -1 for decrease) 
+value: the value by which the lifespan should be adjusted (+1 for increase, -1 for decrease)
 */
 void AEON_ROM::setLifespan(int value)
 {
   if (value > 0)
   {
     // If the person is female, increment the lifespan of female.
-    if (this->sex == ESex::Female){
+    if (this->sex == ESex::Female)
+    {
       this->lifespanFemale++;
     }
 
@@ -314,7 +320,8 @@ void AEON_ROM::setLifespan(int value)
   else if (value < 0)
   {
     // If the person is female, decrement the lifespan of female.
-    if (this->sex == ESex::Female){
+    if (this->sex == ESex::Female)
+    {
       this->lifespanFemale--;
     }
     // If the person is male, decrement the lifespan of male.
@@ -326,6 +333,15 @@ void AEON_ROM::setLifespan(int value)
 }
 
 /*
+Update the Lifespan with defaults
+*/
+void AEON_ROM::updateDefaultLifespan()
+{
+  this->lifespanFemale = GLOBAL_DEFAULTS::defaultLifespanFemale[this->language];
+  this->lifespanMale = GLOBAL_DEFAULTS::defaultLifespanMale[this->language];
+}
+
+/*
 Get Language
 */
 ELanguage AEON_ROM::getLanguage()
@@ -334,33 +350,35 @@ ELanguage AEON_ROM::getLanguage()
 }
 
 /*
-Sets the language 
+Sets the language
 */
 void AEON_ROM::setLanguage(int value)
 {
-    //int numLanguages = std::size(ELanguage{});            // c++17
-    int numLanguages = static_cast<int>(ELanguage::Count); //
-    int currentLanguageIndex = static_cast<int>(this->language);
+  // int numLanguages = std::size(ELanguage{});            // c++17
+  int numLanguages = static_cast<int>(ELanguage::Count); //
+  int currentLanguageIndex = static_cast<int>(this->language);
 
-    // Next Language
-    if (value > 0)
-    {
-        currentLanguageIndex = (currentLanguageIndex + 1) % numLanguages;
-    }
-    // Previous Language
-    else if (value < 0)
-    {
-        currentLanguageIndex = (currentLanguageIndex - 1 + numLanguages) % numLanguages;
-    }
-    // Invalid value - keep language
-    else
-    {
-        return;
-    }
+  // Next Language
+  if (value > 0)
+  {
+    currentLanguageIndex = (currentLanguageIndex + 1) % numLanguages;
+  }
+  // Previous Language
+  else if (value < 0)
+  {
+    currentLanguageIndex = (currentLanguageIndex - 1 + numLanguages) % numLanguages;
+  }
+  // Invalid value - keep language
+  else
+  {
+    return;
+  }
 
-    language = static_cast<ELanguage>(currentLanguageIndex);
-  
+  language = static_cast<ELanguage>(currentLanguageIndex);
   this->language = language;
+
+  // Update default lifespan based on language
+  updateDefaultLifespan();
 }
 
 /*

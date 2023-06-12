@@ -5,6 +5,7 @@ AEON_Global.h
 #ifndef AEON_GLOBAL_h
 #define AEON_GLOBAL_h
 
+#include <map>
 #include <Arduino.h>
 #include "AEON_Enums.h"
 
@@ -23,12 +24,9 @@ struct GLOBAL_DEFAULTS
     static int defaultBirthdayMonth;
     static int defaultBirthdayDay;
     static ESex defaultSex;
-    static int defaultLifespanFemale;
-    static int defaultLifespanMale;
+    static std::map<ELanguage, int> defaultLifespanFemale;
+    static std::map<ELanguage, int> defaultLifespanMale;
     static ELanguage defaultLanguage;
 };
-
-//extern const char *monthOfYearMapping[];
-//extern const char *dayOfWeekMapping[];
 
 #endif

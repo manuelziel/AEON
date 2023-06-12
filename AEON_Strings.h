@@ -11,9 +11,9 @@ AEON_Strings.h
 
 class AEON_Strings {
 private:
-  static const char* dayOfWeek[][2];
-  static const char* monthOfYear[][2];
-  static const char* text[][2];
+  static const char* dayOfWeek[][4];
+  static const char* monthOfYear[][4];
+  static const char* text[][4];
 
 public:
   enum class EStrings {
@@ -37,6 +37,8 @@ public:
     Language,
     English,
     German,
+    French,
+    Spain,
     SetupReset,
     Reset,
     YES,

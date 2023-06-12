@@ -1052,6 +1052,16 @@ void AEON_Display::pageSetupLanguage_set(ELanguage language)
     sprintf(bufSecondBoundary, "%s", string);
     break;
 
+    case ELanguage::French :
+    string = strings.getString(AEON_Strings::EStrings::French);
+    sprintf(bufSecondBoundary, "%s", string);
+    break;
+
+    case ELanguage::Spain :
+    string = strings.getString(AEON_Strings::EStrings::Spain);
+    sprintf(bufSecondBoundary, "%s", string);
+    break;
+
   default:
     break;
   }

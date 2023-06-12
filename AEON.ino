@@ -3,7 +3,7 @@ This is the Code for AEON Lifetime Clock
 
 The Project uses the following components:
 
-- Display SSD1306 128x64 Pixel (I2C)
+- Display SSD1306 / SSD1309 128x64 Pixel (I2C)
   - EA OLEDM128-6LWA or EA OLEDL128-6LWA
 - RTC
   - DS3231SN (I2C)
