@@ -44,7 +44,7 @@ This project was created by Manuel Ziel as a hobby project. The code for the RTC
 
 - Adafruit_SSD1306 (https://github.com/adafruit/Adafruit_SSD1306)
 - Adafruit_GFX (https://github.com/adafruit/Adafruit-GFX-Library)
-- DS3231 (https://github.com/adafruit/RTClib)
+- DS3231 / RTClib (https://github.com/adafruit/RTClib)
 
 ## Contribution
 
